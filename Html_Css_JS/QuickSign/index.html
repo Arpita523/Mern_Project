@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quick Signature</title>
+    <style>
+      body {
+        margin: 30px;
+        padding: 40px;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .top {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .block input[type="color"],
+      .block select {
+        width: 200px;
+        padding: 4px;
+        margin-top: 2px;
+        margin: 10px;
+      }
+
+      .canvas {
+        border: 2px solid black;
+        display: block;
+        margin: 5px auto;
+      }
+
+      .bottom {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 10px 60px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      /* .top > block {
+        margin: 10px;
+      }
+      .bottom > button {
+        margin: 10px;
+      }
+      .block > p {
+        margin: 10px auto;
+      } */
+    </style>
+    <link rel="icon" href="favicon-16x16.png" />
+    <link rel="stylesheet" href="
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="main">
+      <div class="top">
+        <div class="block">
+          <p>Text Color Picker</p>
+          <input class="form-control" type="color" id="colorPicker" />
+        </div>
+        <div class="block">
+          <p>Background Color Picker</p>
+          <input class="form-control" type="color" id="canvasColor" />
+        </div>
+        <div class="block">
+          <p>Font Size</p>
+          <select id="fontSize">
+            <option value="Select Font Size">Select Font Size</option>
+            <option value="10">10px</option>
+            <option value="20">20px</option>
+            <option value="30">30px</option>
+            <option value="40">40px</option>
+            <option value="50">50px</option>
+          </select>
+        </div>
+      </div>
+      <canvas class="canvas" id="myCanvas" width="800" height="500"></canvas>
+      <div class="bottom">
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="clearButton"
+          style="background-color: rgb(255, 68, 0); color: white"
+        >
+          Clear
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          id="saveButton"
+          style="background-color: rgb(0, 128, 6); color: white"
+        >
+          Save & Download
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning"
+          id="retrieveButton"
+          style="background-color: rgb(218, 199, 32); color: white"
+        >
+          Retrieve Saved Signature
+        </button>
+      </div>
+    </div>
+    <script>
+      const colorPicker = document.getElementById("colorPicker")
+      const canvasColor = document.getElementById("canvasColor")
+      const canvas = document.getElementById("myCanvas")
+      const clearButton = document.getElementById("clearButton")
+      const saveButton = document.getElementById("saveButton")
+      const retrieveButton = document.getElementById("retrieveButton")
+      const fontPicker = document.getElementById("fontSize")
+      const ctx = canvas.getContext("2d")
+
+      let isDrawing = false
+      let lastX = 0
+      let lastY = 0
+
+      let currentColor = colorPicker.value
+
+      // ✅ Update color when picker changes
+      colorPicker.addEventListener("input", (e) => {
+        currentColor = e.target.value
+      })
+
+      // ✅ Set canvas background
+      canvasColor.addEventListener("input", (e) => {
+        ctx.fillStyle = e.target.value
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      })
+
+      canvas.addEventListener("mousedown", (e) => {
+        isDrawing = true
+        lastX = e.offsetX
+        lastY = e.offsetY
+      })
+
+      canvas.addEventListener("mousemove", (e) => {
+        if (!isDrawing) return
+        ctx.strokeStyle = currentColor
+        ctx.beginPath()
+        ctx.moveTo(lastX, lastY)
+        ctx.lineTo(e.offsetX, e.offsetY)
+        ctx.stroke()
+        lastX = e.offsetX
+        lastY = e.offsetY
+      })
+
+      canvas.addEventListener("mouseup", () => {
+        isDrawing = false
+      })
+
+      canvas.addEventListener("mouseleave", () => {
+        isDrawing = false
+      })
+
+      fontPicker.addEventListener("change", (e) => {
+        ctx.lineWidth = e.target.value
+      })
+      clearButton.addEventListener("click", () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      })
+      saveButton.addEventListener("click", () => {
+        localStorage.setItem("canvasContents", canvas.toDataURL())
+        let link = document.createElement("a")
+        link.download = "my-canvas.png"
+        link.href = canvas.toDataURL()
+        link.click()
+      })
+      retrieveButton.addEventListener("click", (e) => {
+        let savedCanvas = localStorage.getItem("canvasContents")
+        if(savedCanvas){
+          let img = new Image()
+          img.src = savedCanvas;
+          ctx.drawImage(img, 0, 0)
+        }
+      })
+    </script>
+  </body>
+</html>
